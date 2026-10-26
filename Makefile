@@ -34,7 +34,7 @@ OBJS += bpmp ccplex clock di i2c irq timer \
 		mc sdram minerva smmu \
 		gpio pinmux pmc se tsec uart \
 		fuse kfuse \
-		sdmmc sdmmc_driver emmc sd emummc \
+		sdmmc sdmmc_driver emmc sd emummc emummc_emmc \
 		bq24193 max17050 max7762x max77620-rtc \
 		hw_init
 

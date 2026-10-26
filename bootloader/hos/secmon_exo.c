@@ -24,12 +24,14 @@
 #include "../config.h"
 #include <libs/fatfs/ff.h>
 #include "../storage/emummc.h"
+#include "../storage/emummc_emmc.h"
 
 enum emuMMC_Type
 {
 	emuMMC_None = 0,
 	emuMMC_Partition,
 	emuMMC_File,
+	emuMMC_PartitionEmmc = EMUMMC_EXO_TYPE_PARTITION_EMMC,
 	emuMMC_MAX
 };
 
@@ -326,7 +328,7 @@ void config_exosphere(launch_ctxt_t *ctxt, u32 warmboot_base)
 	if (emu_cfg.enabled && !h_cfg.emummc_force_disable)
 	{
 		exo_cfg->emummc_cfg.base_cfg.magic = EMUMMC_MAGIC;
-		exo_cfg->emummc_cfg.base_cfg.type = emu_cfg.sector ? emuMMC_Partition : emuMMC_File;
+		exo_cfg->emummc_cfg.base_cfg.type = emummc_emmc_is_active() ? emuMMC_PartitionEmmc : (emu_cfg.sector ? emuMMC_Partition : emuMMC_File);
 		exo_cfg->emummc_cfg.base_cfg.fs_ver = emu_cfg.fs_ver;
 		exo_cfg->emummc_cfg.base_cfg.id = emu_cfg.id;
 

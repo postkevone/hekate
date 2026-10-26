@@ -20,6 +20,7 @@
 #include <bdk.h>
 
 #include "emummc.h"
+#include "emummc_emmc.h"
 #include "../config.h"
 #include <libs/fatfs/ff.h>
 
@@ -85,6 +86,8 @@ bool emummc_set_path(char *path)
 			if (emu_cfg.sector)
 				found = true;
 	}
+	else if (emummc_emmc_probe_path(path))
+		found = true;
 	else
 	{
 		strcpy(emu_cfg.emummc_file_based_path, path);
@@ -101,7 +104,7 @@ bool emummc_set_path(char *path)
 
 	if (found)
 	{
-		emu_cfg.enabled = 1;
+		emu_cfg.enabled = emummc_emmc_path_enabled_value();
 
 		// Get ID from path.
 		u32 id_from_path = 0;
@@ -146,6 +149,9 @@ int emummc_storage_init_mmc()
 	if (sd_mount())
 		goto out;
 
+	if (emummc_emmc_is_active())
+		return emummc_emmc_init();
+
 	if (!emu_cfg.sector)
 	{
 		strcpy(emu_cfg.emummc_file_based_path, emu_cfg.path);
@@ -175,7 +181,7 @@ out:
 
 int emummc_storage_end()
 {
-	if (!emu_cfg.enabled || h_cfg.emummc_force_disable)
+	if (!emu_cfg.enabled || h_cfg.emummc_force_disable || emummc_emmc_is_active())
 		emmc_end();
 	else
 		sd_end();
@@ -192,7 +198,7 @@ int emummc_storage_read(u32 sector, u32 num_sectors, void *buf)
 	{
 		sector += emu_cfg.sector;
 		sector += emummc_raw_get_part_off(emu_cfg.active_part) * 0x2000;
-		return sdmmc_storage_read(&sd_storage, sector, num_sectors, buf);
+		return sdmmc_storage_read(emummc_raw_storage(), sector, num_sectors, buf);
 	}
 	else
 	{
@@ -235,7 +241,7 @@ int emummc_storage_write(u32 sector, u32 num_sectors, void *buf)
 	{
 		sector += emu_cfg.sector;
 		sector += emummc_raw_get_part_off(emu_cfg.active_part) * 0x2000;
-		return sdmmc_storage_write(&sd_storage, sector, num_sectors, buf);
+		return sdmmc_storage_write(emummc_raw_storage(), sector, num_sectors, buf);
 	}
 	else
 	{
@@ -270,7 +276,7 @@ int emummc_storage_write(u32 sector, u32 num_sectors, void *buf)
 int emummc_storage_set_mmc_partition(u32 partition)
 {
 	emu_cfg.active_part = partition;
-	emmc_set_partition(partition);
+	emmc_set_partition(emummc_mmc_partition(partition));
 
 	if (!emu_cfg.enabled || h_cfg.emummc_force_disable || emu_cfg.sector)
 		return 0;
