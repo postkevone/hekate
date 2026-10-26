@@ -6,7 +6,8 @@ It is meant to be used together with the matching Atmosphère fork ([postkevone/
 
 ## Requirements
 
-- **Atmosphère fork:** boot entries must load `package3` from the Atmosphère fork, for example `fss0=atmosphere/package3`. Its exosphere and emummc KIP understand emuMMC type `3` (partition on eMMC). Stock Atmosphère and the stock `bootloader/sys/emummc.kipm` do not, and would redirect to the SD card instead.
+- **Atmosphère fork's exosphere:** boot entries must load `package3` from the Atmosphère fork, for example `fss0=atmosphere/package3`. Its exosphere understands emuMMC type `3` (partition on eMMC). Stock exosphere does not.
+- **Atmosphère fork's emuMMC module as `bootloader/sys/emummc.kipm`:** hekate does not use the emuMMC KIP inside `package3`. It always injects `bootloader/sys/emummc.kipm` into FS. The stock `emummc.kipm` does not know type `3`, so it must be replaced with one built from the Atmosphère fork's `emummc/emummc_unpacked.kip` (see "Release package" below).
 - **Creating the partition:** this fork can boot from an eMMC emuMMC partition but cannot create one. Create it once with hekate-pro. Its partition manager shrinks the sysNAND `USER` partition and adds the `emummc` partition after it, and its emuMMC tool writes the files described below.
 
 Launching Atmosphère's `fusee.bin` as a payload doesn't need this fork, because fusee reads `emummc.ini` itself.
@@ -82,6 +83,19 @@ Upstream files with small hook lines:
 | `bootloader/hos/secmon_exo.c` | `emuMMC_PartitionEmmc = 3` and its use in the exosphere config |
 | `nyx/nyx_gui/frontend/gui_tools.c` | UMS refusal (error `4`) and its message |
 | `nyx/nyx_gui/frontend/gui_emummc_tools.c` | "eMMC"/"SD" label in the emuMMC info panel |
+
+## Release package
+
+The release zip is the official hekate release layout, with the files built from this fork replacing the official ones:
+
+| File | Source |
+|---|---|
+| `hekate_ctcaer_<ver>.bin`, `bootloader/update.bin` | `output/hekate.bin` |
+| `bootloader/sys/nyx.bin`, `libsys_lp0.bso`, `libsys_minerva.bso` | `output/` |
+| `bootloader/sys/emummc.kipm` | Atmosphère fork: `python3 emummc/tools/kip1converter.py emummc/emummc_unpacked.kip emummc.data` (writes `emummc.caps` to the current folder), then `cat emummc.caps emummc.data > emummc.kipm` |
+| `bootloader/res/*`, `bootloader/sys/res.pak`, `thk.bin`, `l4t/*` | Unchanged from the official release zip |
+
+The 8GB variant (`__ram8GB.bin`) is the same payload with byte `0x122` set to `0x01`. That byte is `rsvd_flags` (`RSVD_FLAG_DRAM_8GB`) in the version header at `0x118` (magic `ICTC`). It is the only difference between CTCaer's official normal and `__ram8GB` binaries.
 
 ## Updating from upstream
 
