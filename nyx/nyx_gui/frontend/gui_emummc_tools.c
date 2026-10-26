@@ -20,6 +20,7 @@
 
 #include "gui.h"
 #include "fe_emummc_tools.h"
+#include "fe_emummc_emmc.h"
 #include "gui_tools_partition_manager.h"
 #include <libs/fatfs/ff.h>
 
@@ -1104,8 +1105,8 @@ lv_res_t create_win_emummc_tools(lv_obj_t *btn)
 	if (emu_info.enabled)
 	{
 		if (emu_info.sector)
-			s_printf(txt_buf, "#00DDFF Type:# SD Raw Partition\n#00DDFF Sector:# 0x%08X\n#00DDFF Nintendo folder:# %s\n",
-				emu_info.sector, emu_info.nintendo_path ? emu_info.nintendo_path : "");
+			s_printf(txt_buf, "#00DDFF Type:# %s Raw Partition\n#00DDFF Sector:# 0x%08X\n#00DDFF Nintendo folder:# %s\n",
+				emummc_cfg_is_emmc(&emu_info) ? "eMMC" : "SD", emu_info.sector, emu_info.nintendo_path ? emu_info.nintendo_path : "");
 		else
 			s_printf(txt_buf, "#00DDFF Type:# SD File\n#00DDFF Base folder:# %s\n#00DDFF Nintendo folder:# %s\n",
 				emu_info.path ? emu_info.path : "", emu_info.nintendo_path ? emu_info.nintendo_path : "");
