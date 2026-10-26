@@ -6,7 +6,7 @@ It is meant to be used together with the matching Atmosphère fork ([postkevone/
 
 ## Requirements
 
-- **Atmosphère fork's exosphere:** boot entries must load `package3` from the Atmosphère fork, for example `fss0=atmosphere/package3`. Its exosphere understands emuMMC type `3` (partition on eMMC). Stock exosphere does not.
+- **Atmosphère fork's exosphere:** boot entries must load `package3` from the Atmosphère fork, for example `pkg3=atmosphere/package3` (`fss0=` is the deprecated alias of the same key). Its exosphere understands emuMMC type `3` (partition on eMMC). Stock exosphere does not.
 - **Atmosphère fork's emuMMC module as `bootloader/sys/emummc.kipm`:** hekate does not use the emuMMC KIP inside `package3`. It always injects `bootloader/sys/emummc.kipm` into FS. The stock `emummc.kipm` does not know type `3`, so it must be replaced with one built from the Atmosphère fork's `emummc/emummc_unpacked.kip` (see "Release package" below).
 - **Creating the partition:** this fork can boot from an eMMC emuMMC partition but cannot create one. Create it once with hekate-pro. Its partition manager shrinks the sysNAND `USER` partition and adds the `emummc` partition after it, and its emuMMC tool writes the files described below.
 
@@ -119,7 +119,7 @@ Conflicts can only happen at the hook lines above. The most likely spots are `em
 ## Testing
 
 1. Build: `make` (devkitARM). The output is `output/hekate.bin` and `output/nyx.bin`.
-2. With an eMMC emuMMC partition made by hekate-pro and `enabled=4`, launch an entry with `fss0=` pointing at the Atmosphère fork's `package3`, and confirm the console boots into emuMMC.
+2. With an eMMC emuMMC partition made by hekate-pro and `enabled=4`, launch an entry with `pkg3=` pointing at the Atmosphère fork's `package3`, and confirm the console boots into emuMMC.
 3. Change something in emuMMC and check that sysNAND does not show it.
 4. Regression: SD raw and SD file emuMMC still boot.
 5. Nyx: the emuMMC info panel says "eMMC Raw Partition", and the emuMMC UMS buttons refuse.
